@@ -13,22 +13,25 @@ public class ProjectsApp {
 	
 	Scanner scanner = new Scanner(System.in);
 	ProjectService projectService = new ProjectService();
+	Project curProject;
 	
 	// @formatter:off
 	private List<String> operations = List.of(
-			"1) Add a project"
+			"1) Add a project",
+			"2) List projects",
+			"3) Select a project",
+			"4) Update project details",
+			"5) Delete a project"
 			);
 	// @formatter:on
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		
 		new ProjectsApp().processUserSelections();
 			
 	}
 	
 	private void processUserSelections() {
-		// TODO Auto-generated method stub
 		
 		boolean done = false;
 		
@@ -46,6 +49,22 @@ public class ProjectsApp {
 					createProject();
 					break;
 					
+				case 2:
+					listProjects();
+					break;
+					
+				case 3:
+					selectProject();
+					break;
+					
+				case 4:
+					updateProjectDetails();
+					break;
+					
+				case 5:
+					deleteProject();
+					break;
+					
 				default:
 					System.out.println("\n" + selection + " is not a valid selection. Try again.");
 				}
@@ -57,15 +76,129 @@ public class ProjectsApp {
 		
 	}
 
+	private void deleteProject() {
+		
+		listProjects();
+		
+		Integer projectId = getIntInput("Enter the ID of the project to delete ");
+		/*
+		curProject = null;
+		
+		curProject = projectService.fetchProjectById(projectId);
+		
+		if (Objects.isNull(curProject)) {
+			System.out.println("\n Please select project.");
+			return;
+		}
+		*/
+		
+		projectService.deleteProject(projectId);
+		System.out.println("project " + projectId + " was deleted successfully.");
+		
+		if (Objects.nonNull(curProject) && curProject.getProjectId().equals(projectId)) {
+			curProject = null;
+		}
+		
+	}
+
+	private void updateProjectDetails() {
+		
+		if (Objects.isNull(curProject)) {
+			System.out.println("\n Please select project.");
+			return;
+		}
+		/*
+		listProjects();
+		
+		Integer projectId = getIntInput("Enter the ID of the project to update ");
+		
+		curProject = null;
+		
+		curProject = projectService.fetchProjectById(projectId);
+		
+		*/
+		
+		
+		String projectName = getStringInput("Enter the project new name [" + 
+							curProject.getProjectName() + "]");
+		
+		BigDecimal estimatedHours = getDecimalInput("Enter the project new estimated hours [" +
+											curProject.getEstimatedHours() + "]");
+		
+		BigDecimal actualHours = getDecimalInput("Enter the project new actual hours [" + 
+										curProject.getActualHours() + "]");
+		
+		Integer difficulty = getIntInput("Enter the project new difficulty (1 - 5) [" +
+									curProject.getDifficulty() + "]");
+		
+		String notes = getStringInput("Enter the project new notes [" +
+							   curProject.getNotes() + "]");
+		
+		Project project = new Project();
+		
+		project.setProjectName(Objects.isNull(projectName) ? 
+				curProject.getProjectName() : projectName);
+		
+		project.setEstimatedHours(Objects.isNull(estimatedHours) ?
+				curProject.getEstimatedHours() : estimatedHours);
+		
+		project.setActualHours(Objects.isNull(actualHours) ? 
+				curProject.getActualHours() : actualHours); 
+		
+		project.setDifficulty(Objects.isNull(difficulty) ? 
+				curProject.getDifficulty() : difficulty);
+		
+		project.setNotes(Objects.isNull(notes) ? 
+				curProject.getNotes() : notes);
+		
+		project.setProjectId(curProject.getProjectId());
+		
+		projectService.modifyProjectDetails(project);
+		
+		
+		curProject = projectService.fetchProjectById(curProject.getProjectId());
+		
+		
+		
+	}
+
+	private void selectProject() {
+		
+		listProjects();
+		
+		Integer projectId = getIntInput("Enter a product ID to select a product");
+		
+		curProject = null;
+		
+		curProject = projectService.fetchProjectById(projectId);
+		
+		if (Objects.isNull(curProject)) {
+			
+			System.out.println("\n Not A valid project");
+		}
+		
+		
+	}
+
+	private void listProjects() {
+		
+		List<Project> projects = projectService.fetchAllProjects();
+		
+		System.out.println("\n Projects: ");
+		
+		projects.forEach(project -> System.out.println(
+				" " + project.getProjectId() + ": " + project.getProjectName())
+				);
+
+	}
+
 	private boolean exitMenu() {
-		// TODO Auto-generated method stub
 		
 		System.out.println("Exiting the menu.");
 		return true;
 	}
 
 	private void createProject() {
-		// TODO Auto-generated method stub
 		
 		String projectName = getStringInput("Enter the project name ");
 		BigDecimal estimatedHours = getDecimalInput("Enter the estimated hours ");
@@ -87,7 +220,6 @@ public class ProjectsApp {
 	}
 
 	private BigDecimal getDecimalInput(String prompt) {
-		// TODO Auto-generated method stub
 		
 		String input = getStringInput(prompt);
 		
@@ -105,7 +237,6 @@ public class ProjectsApp {
 	}
 
 	private int getUserSelection() {
-		// TODO Auto-generated method stub
 		
 		printOperations();
 		Integer input = getIntInput("Enter a menu selection ");
@@ -114,7 +245,6 @@ public class ProjectsApp {
 	}
 
 	private Integer getIntInput(String prompt) {
-		// TODO Auto-generated method stub
 		
 		String input = getStringInput(prompt);
 		
@@ -132,7 +262,6 @@ public class ProjectsApp {
 	}
 
 	private String getStringInput(String prompt) {
-		// TODO Auto-generated method stub
 		
 		System.out.print(prompt + ": ");
 		String input = scanner.nextLine();
@@ -141,11 +270,18 @@ public class ProjectsApp {
 	}
 
 	private void printOperations() {
-		// TODO Auto-generated method stub
 		
 		System.out.println("\n These are the available selections. Press the enter key to quit: ");
 		
 		operations.forEach(line -> System.out.println(" " + line));
+		
+		if (Objects.isNull(curProject) ) {
+			System.out.println("\n You are not working with a project");
+		}
+		
+		else {
+			System.out.println("\n You are working with project: " + curProject);
+		}
 	}
 
 }
